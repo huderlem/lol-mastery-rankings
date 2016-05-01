@@ -1,0 +1,4 @@
+config/*
+!config/exmample-config.json
+mysql/
+node_modules/

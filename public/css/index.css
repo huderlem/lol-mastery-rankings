@@ -1,0 +1,7 @@
+#summoner-rankings-table thead:hover {
+	cursor: pointer;
+}
+
+#summoner-rankings-table > tbody > tr > td {
+     vertical-align: middle;
+}

@@ -1,0 +1,13 @@
+{
+  "riot-api-client": {
+    "apiKey": "<your-riot-api-key>",
+    "requestLimit": "<your-riot-rate-limit>"
+  },
+  "mysql": {
+    "host": "localhost",
+    "database": "lol-mastery-db",
+    "user": "<database  user>",
+    "password": "<database user password>",
+    "connectionLimit": 100
+  }
+}

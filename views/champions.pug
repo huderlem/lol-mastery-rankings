@@ -1,24 +1,22 @@
 html
   head
-    title LoL Mastery Ranks
+    title LoL Mastery Ranks - Champions
     link(rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css")
     link(rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css")
-    link(rel="stylesheet" href="css/index.css")
+    link(rel="stylesheet" href="css/champions.css")
     script(type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js')
     script(type='text/javascript' src='js/jquery-tablesorter.min.js')
   body
     div.container.box-shadow
       div.jumbotron.text-center
-        h1 LoL Mastery Ranks
-        p.lead View a summoner's champion mastery rankings compared to other players!
+        h1 Top Champion Scores
+        p.lead View the top mastery scores for each Champion!
         p (Note, a summoner must have been previously searched for its data to be considered.)
-        form#summoner-lookup
-          div.input-group
-            span.input-group-btn
-              button.btn.btn-primary(type="submit") Search
-            input#summoner-input.form-control(type="text" autofocus="autofocus" placeholder="Summoner Name" name="summoner-name")
-    div.container
+        select#champion-select.form-control
+          option(value= -1) --- Choose Champion ---
+          each champion, champ_id in champions
+            option(value= champion.id)= champion.name
       div#summoner-ranks
 
 
-  script(type='text/javascript' src='js/index.js')
+  script(type='text/javascript' src='js/champions.js')

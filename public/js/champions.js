@@ -17,52 +17,52 @@ function getUrlParameter(sParam) {
 
 $(document).ready(function() {
     // Automatically load the champion specified in the url query string parameter.
-    var summonerName = getUrlParameter('name');
-    if (summonerName) {
-        $('#summoner-input').val(summonerName);
-        $('#summoner-lookup').trigger('submit');
+    var championId = getUrlParameter('id');
+    if (championId) {
+        $('#champion-select').val(championId);
+        $('#champion-select').trigger('change');
     }
 });
 
-// Lookup rankings data for summoner when the submit button is clicked.
-$('#summoner-lookup').submit(function() {
-    var summonerName = $('#summoner-input').val();
-    if (!summonerName) {
-        return false;
-    }
+// Lookup rankings data for champion when the selected champion changes.
+$('#champion-select').change(function() {
+    var championId = $(this).val();
+    var championName =  $("#champion-select option:selected").text();
+    if (championId < 1) return;
 
     $('#summoner-ranks').empty();
     $('#summoner-ranks').append(
-        '<div class="loading text-center"><p>Looking up champion rankings for ' + summonerName + '...</p>' +
-        '<img src="img/loading.gif"></div>'
+        '<p>Looking up top champion rankings for ' + championName + '...</p>'
     );
 
     // Fetch summoner's ranking data asynchronously.
-    $.getJSON('api/summonerranks/' + summonerName, function(data) {
+    $.getJSON('api/championranks/' + $(this).val(), function(data) {
         if ($.isEmptyObject(data)) {
             $('#summoner-ranks').html(
-                '<p>Error: No data found for ' + summonerName + '...</p>'
+                '<p>Error: No data found for ' + championName + '...</p>'
             );
             return;
         }
 
-        // Build table from the rankings data.
+        // Build table from the top champion scores data.
         var rows = [];
         var rowHTML;
-        $.each(data, function(index, championData) {
+        var iconUrl;
+        $.each(data, function(index, summonerScore) {
             rowHTML = '<tr>' + 
-                        '<td class="vert-align"><a href="champions?id=' + championData.champion_id + '"><img width=40 height=40 src="' + championData.champion_icon + '"> ' + championData.champion_name + '</a></td>' +
-                        '<td class="vert-align">' + championData.rank + '/' + championData.total + ' (' + Math.round(championData.percentile) + '%)</td>' +
-                        '<td>' + championData.score + '</td>' +
+                        '<td class="vert-align">' + (index + 1) + '.</td>' +
+                        '<td class="vert-align">' + summonerScore.name + '</td>' +
+                        '<td class="vert-align">' + summonerScore.score + '</td>' +
                       '</tr>';
             rows.push(rowHTML);
+            iconUrl = summonerScore.champion_icon;
         });
 
         var tableHTML = '<table id="summoner-rankings-table" class="table table-bordered tablesorter">' +
                           '<thead>' +
                             '<tr>' +
-                              '<th>Champion <i class="fa fa-sort" aria-hidden="true"></i></th>' +
                               '<th>Rank <i class="fa fa-sort" aria-hidden="true"></i></th>' +
+                              '<th>Summoner <i class="fa fa-sort" aria-hidden="true"></i></th>' +
                               '<th>Mastery Score <i class="fa fa-sort" aria-hidden="true"></i></th>' +
                             '</tr>' +
                           '</thead>' +
@@ -71,11 +71,9 @@ $('#summoner-lookup').submit(function() {
                           '</tbody>' +
                         '</table>';
         $('#summoner-ranks').empty();
-        $('#summoner-ranks').append('<h2>' + summonerName + ' Champion Ranks</h2>');
+        $('#summoner-ranks').append('<h2><img src="' + iconUrl + '"> ' + championName + ' Top Mastery Scores</h2>');
         $('#summoner-ranks').append(tableHTML);
 
-        $('#summoner-rankings-table').tablesorter({sortList: [[2,1]]});
+        $('#summoner-rankings-table').tablesorter({sortList: [[0,0]]});
     });
-
-    return false;
 });

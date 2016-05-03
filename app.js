@@ -14,6 +14,7 @@ var CHAMPION_ENDPOINT        = 'https://global.api.pvp.net/api/lol/static-data/n
 var CHAMPIONMASTERY_ENDPOINT = 'https://na.api.pvp.net/championmastery/location/na1/player/{0}/champions';
 var SUMMONER_ENDPOINT        = 'https://na.api.pvp.net/api/lol/na/v1.4/summoner/by-name/{0}';
 var champions = {};
+var sortedChampions = [];
 
 var connectionPool = mysql.createPool(config.get('mysql'));
 initializeApp();
@@ -23,14 +24,25 @@ app.get('/', function(req, res) {
     res.render('index');
 });
 
+app.get('/champions', function(req, res) {
+    res.render('champions', {'champions': sortedChampions});
+});
+
 app.get('/api/summonerranks/:name', function(req, res) {
     getChampionRanksForSummonerName(res, req.params.name)
 });
 
-app.get('/api/populatesummoner/:name', function(req, res) {
+app.get('/api/populatesummonerbyname/:name', function(req, res) {
     saveChampionMasteriesForSummonerNames(res, [req.params.name]);
 });
 
+app.get('/api/populatesummonerbyid/:id', function(req, res) {
+    saveChampionMasteriesForSummonerId(res, req.params.id);
+});
+
+app.get('/api/championranks/:id', function(req, res) {
+    getChampionRanksById(res, req.params.id);
+});
 
 app.listen(3000, function() {
     console.log('App listening...');
@@ -71,12 +83,21 @@ function initializeApp() {
             }
 
             champions = championData.data;
+            sortedChampions = [];
 
             // Save the urls for the champion images.
             for (var championId in champions) {
                 var iconUrl = DDRAGON_STATIC_DATA_URL + 'img/champion/' + champions[championId].key + '.png';
                 champions[championId].champIconUrl = String.format(iconUrl, version);
+
+                sortedChampions.push(champions[championId]);
             }
+
+            sortedChampions.sort(function(a, b) {
+                if (a.name < b.name) return -1;
+                if (a.name > b.name) return 1;
+                return 0;
+            });
         });
     });
 };
@@ -146,6 +167,43 @@ function getChampionRanksForSummonerId(res, summonerId) {
                 var data = rankingsData[i];
                 data.champion_name = champions[data.champion_id].name;
                 data.champion_icon = champions[data.champion_id].champIconUrl;
+            }
+
+            res.send(rankingsData);
+       })
+    });
+}
+
+/**
+ * Gets the top champion mastery scores for the given champion.
+ * Responds with json.
+ * @param int championId
+ */
+function getChampionRanksById(res, championId) {
+    connectionPool.getConnection(function(err, connection) {
+        if (err) {
+            console.log(err);
+            connection.release();
+            res.send({});
+            return;
+        }
+
+        var sproc = 'CALL get_top_champion_scores(' + championId + ', 20)';
+        connection.query(sproc, function(err, result) {
+            connection.release();
+            if (err) {
+                console.log(err);
+                console.log('Error getting top champion scores for champion ' + championId + '\nQuery:\n' + sproc);
+                res.send({});
+                return;
+            }
+
+             // Augment the raw data with the human-friendly static champion content.
+            var rankingsData = result[0];
+            for (var i = 0; i < rankingsData.length; i++) {
+                var data = rankingsData[i];
+                data.champion_name = champions[championId].name;
+                data.champion_icon = champions[championId].champIconUrl;
             }
 
             res.send(rankingsData);

@@ -29,15 +29,25 @@ app.get('/champions', function(req, res) {
 });
 
 app.get('/api/summonerranks/:name', function(req, res) {
-    getChampionRanksForSummonerName(res, req.params.name)
+    saveChampionMasteriesForSummonerName(res, [req.params.name], function() {
+        getChampionRanksForSummonerName(res, req.params.name);
+    });
 });
 
 app.get('/api/populatesummonerbyname/:name', function(req, res) {
-    saveChampionMasteriesForSummonerNames(res, [req.params.name]);
+    saveChampionMasteriesForSummonerName(res, req.params.name, function() {
+        res.send({
+            success: true
+        })
+    });
 });
 
 app.get('/api/populatesummonerbyid/:id', function(req, res) {
-    saveChampionMasteriesForSummonerId(res, req.params.id);
+    saveChampionMasteriesForSummonerId(res, req.params.id, function() {
+        res.send({
+            success: true
+        });
+    });
 });
 
 app.get('/api/championranks/:id', function(req, res) {
@@ -215,9 +225,9 @@ function getChampionRanksById(res, championId) {
  * Queries Riot API for summoner information, then saves champion mastery data.
  * @param array summonerNames
  */
-function saveChampionMasteriesForSummonerNames(res, summonerNames)
+function saveChampionMasteriesForSummonerName(res, summonerName, callback)
 {
-    var url = String.format(SUMMONER_ENDPOINT, summonerNames.join(','));
+    var url = String.format(SUMMONER_ENDPOINT, summonerName);
     riotAPI.get(url, function(err, data) {
         if (err) {
             console.log(err);
@@ -225,14 +235,14 @@ function saveChampionMasteriesForSummonerNames(res, summonerNames)
             return;
         }
 
-        var summonerIds = [];
+        var summonerId;
 
         // Build a query to insert or update the summoner data into the database.
         var insertQuery = 'INSERT INTO summoners (id, name)\n' + 
                     'VALUES\n';
         for (var key in data) {
             var summonerData = data[key];
-            summonerIds.push(summonerData.id);
+            summonerId = summonerData.id;
             insertQuery += String.format("    ({0}, '{1}'),\n", summonerData.id, summonerData.name);
         }
 
@@ -261,9 +271,7 @@ function saveChampionMasteriesForSummonerNames(res, summonerNames)
                     return;
                 }
 
-                for (var i = 0; i < summonerIds.length; i++) {
-                    saveChampionMasteriesForSummonerId(res, summonerIds[i]);
-                }
+                saveChampionMasteriesForSummonerId(res, summonerId, callback);
            })
         });
     });
@@ -274,7 +282,7 @@ function saveChampionMasteriesForSummonerNames(res, summonerNames)
  * Saves the results into the database.
  * @param int summonerId
  */
-function saveChampionMasteriesForSummonerId(res, summonerId) {
+function saveChampionMasteriesForSummonerId(res, summonerId, callback) {
     var url = String.format(CHAMPIONMASTERY_ENDPOINT, summonerId);
     riotAPI.get(url, function(err, data) {
         if (err) {
@@ -283,7 +291,7 @@ function saveChampionMasteriesForSummonerId(res, summonerId) {
             return;
         }
 
-        insertChampionMasteries(res, data);
+        insertChampionMasteries(res, data, callback);
     });
 }
 
@@ -291,10 +299,10 @@ function saveChampionMasteriesForSummonerId(res, summonerId) {
  * Inserts/updates the champion mastery data into the database.
  * @param data json data for champion mastery data
  */
-function insertChampionMasteries(res, data) {
+function insertChampionMasteries(res, data, callback) {
     if (data.length < 1) {
         console.log("No champion mastery data provided to insert...");
-        res.send({success: true});
+        res.send({});
         return;
     }
 
@@ -331,10 +339,7 @@ function insertChampionMasteries(res, data) {
                 return;
             }
 
-            res.send({
-                success: true,
-                result: result,
-            });
+            callback();
         })
     });
 }

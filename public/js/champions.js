@@ -51,7 +51,7 @@ $('#champion-select').change(function() {
         $.each(data, function(index, summonerScore) {
             rowHTML = '<tr>' + 
                         '<td class="vert-align">' + (index + 1) + '.</td>' +
-                        '<td class="vert-align">' + summonerScore.name + '</td>' +
+                        '<td class="vert-align"><a href="/?name=' + summonerScore.name + '">' + summonerScore.name + '</a></td>' +
                         '<td class="vert-align">' + summonerScore.score + '</td>' +
                       '</tr>';
             rows.push(rowHTML);

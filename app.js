@@ -28,6 +28,10 @@ app.get('/champions', function(req, res) {
     res.render('champions', {'champions': sortedChampions});
 });
 
+app.get('/about', function(req, res) {
+    res.render('about');
+});
+
 app.get('/api/summonerranks/:name', function(req, res) {
     saveChampionMasteriesForSummonerName(res, [req.params.name], function() {
         getChampionRanksForSummonerName(res, req.params.name);

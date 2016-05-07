@@ -1,0 +1,28 @@
+html
+  head
+    title LoL Mastery Ranks - About
+    link(rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css")
+    link(rel="stylesheet" href="css/index.css")
+  body
+    nav.navar.navbar-inverse
+      div.container
+        div.navbar-collapse.collapse
+          ul.nav.navbar-nav
+            li
+              a(href="/") Players
+            li
+              a(href="/champions") Champions
+            li.active
+              a(href="/about") About
+            li
+              a(href="https://github.com/huderlem/lol-mastery-rankings") GitHub
+    div.container.box-shadow
+      div.jumbotron.text-center
+        h1 About
+    div.container
+      p This app was created for the #[a(href="https://developer.riotgames.com/discussion/announcements/show/eoq3tZd1") Riot API Challenge (April 2016)]. Its purpose is to provide a leaderboard for summoners' champion mastery points. For more technical information, please read the info provided in this project's #[a(href="https://github.com/huderlem/lol-mastery-rankings") GitHub repository].
+      footer.footer
+        div.container
+          p#hack 
+
+  script(type='text/javascript' src='js/index.js')

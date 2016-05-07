@@ -7,6 +7,18 @@ html
     script(type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js')
     script(type='text/javascript' src='js/jquery-tablesorter.min.js')
   body
+    nav.navar.navbar-inverse
+      div.container
+        div.navbar-collapse.collapse
+          ul.nav.navbar-nav
+            li.active
+              a(href="/") Players
+            li
+              a(href="/champions") Champions
+            li
+              a(href="/about") About
+            li
+              a(href="https://github.com/huderlem/lol-mastery-rankings") GitHub
     div.container.box-shadow
       div.jumbotron.text-center
         h1 LoL Mastery Ranks
@@ -19,6 +31,5 @@ html
             input#summoner-input.form-control(type="text" autofocus="autofocus" placeholder="Summoner Name" name="summoner-name")
     div.container
       div#summoner-ranks
-
 
   script(type='text/javascript' src='js/index.js')

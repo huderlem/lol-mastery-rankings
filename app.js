@@ -1,6 +1,7 @@
 var config = require('config');
 var riotAPI = require('riot-api-client')(config.get('riot-api-client'));
 var mysql = require('mysql');
+var cron = require('cron').CronJob;
 var express = require('express');
 var app = express();
 app.set('view engine', 'pug');
@@ -18,6 +19,18 @@ var sortedChampions = [];
 
 var connectionPool = mysql.createPool(config.get('mysql'));
 initializeApp();
+
+// We need to periodically initialize the app, in case a new League patch comes out, for example.
+// This cron pattern means "run at the start of every hour".
+var initializeJob = new cron({
+    cronTime: '0 * * * *',
+    onTick: function() {
+        console.log('Re-initializing app...');
+        initializeApp();
+    },
+    start: true
+});
+initializeJob.start();
 
 // Express endpoints
 app.get('/', function(req, res) {
